@@ -1,0 +1,13 @@
+---
+- hosts: master
+  become_user: ubuntu
+  tasks:
+    - name: Deployed NGINX
+      shell: kubectl create deployment nginx --image=nginx
+    - name: Exposed port
+      shell: kubectl expose deploy nginx --port 80 --target-port 80 --type NodePort
+    - name: List files and folder in home directory
+      shell: kubectl get services
+      register: command_output
+    - debug:
+        var: command_output.stdout_lines

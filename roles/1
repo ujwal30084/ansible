@@ -1,0 +1,17 @@
+---
+#- hosts: worker
+# remote_user: root
+
+# roles:
+#   - common_requirement
+- hosts: master
+  remote_user: root
+
+  roles:
+    - getting_join_command
+
+- hosts: worker
+  remote_user: root
+
+  roles:
+    - joining_worker  

@@ -1,0 +1,135 @@
+- hosts: master
+  vars:
+  - node: kube-worker1
+  become_user: ubuntu
+  #gather_facts: false
+  tasks:
+  - name: remove node from cluster
+    shell: kubectl drain {{node}} --ignore-daemonsets
+    ignore_errors: True
+
+  - name: delete node from cluster
+    shell: kubectl delete node {{node}}
+    ignore_errors: True
+
+- hosts: remove
+  become_user: ubuntu
+  tasks:
+  - name: reset the node
+    shell: kubeadm reset --force
+
+  - name: Remove file node_joined.log
+    become_user: ubuntu
+    file:
+      path: /home/ubuntu/node_joined.log
+      state: absent
+  - name: Stop containerd
+    systemd:
+      name: containerd
+      state: stopped
+      enabled: False
+   
+
+  - name: Remove unit file
+    file:
+      path: /etc/systemd/system/containerd.service
+      state: absent
+
+  - stat:
+      path: /etc/systemd/system/kubelet.service
+    register: result
+  
+  - name: Stop kubelet
+    systemd:
+      name: kubelet
+      state: stopped
+      enabled: False
+    when: result.stat.exists
+
+  - name: Remove unit file
+    file:
+      path: /etc/systemd/system/kubelet.service
+      state: absent
+
+  - stat:
+      path: /etc/systemd/system/kube-proxy.service
+    register: result
+  
+  - name: Stop kube-proxy
+    systemd:
+      name: kube-proxy
+      state: stopped
+      enabled: False
+    when: result.stat.exists
+
+  - name: Remove unit file
+    file:
+      path: /etc/systemd/system/kube-proxy.service
+      state: absent
+
+  - name: Find mounted directories
+    shell: "awk '$2 ~ path {print $2}' path=/var/lib/kubelet /proc/mounts"
+    register: "result"
+
+  - name: Unmount volumes
+    mount:
+      path: "{{ item }}"
+      state: unmounted
+    with_items:
+      - "{{ result.stdout_lines }}"
+
+  - name: Remove directories
+    file:
+      path: "{{ item }}"
+      state: absent
+    with_items:
+      - /var/lib/kubelet
+      - /var/lib/containerd
+      - /var/lib/cni
+      - /etc/kubernetes
+      - /etc/containerd
+      - /etc/cni
+      - /opt/cni
+
+  - name: Remove binaries
+    file:
+      path: "/usr/local/bin/{{ item }}"
+      state: absent
+    with_items:
+      - ctr
+      - containerd
+      - containerd-shim
+      - containerd-shim-runc-v1
+      - containerd-release
+      - containerd-stress
+      - runc
+      - kubelet
+      - kube-proxy
+
+- hosts: remove
+  become: yes
+  tasks:
+  - name: uninstall containers
+    apt:
+      name: "{{ item }}"
+      state: absent
+    with_items:
+      # - apt-transport-https
+      - containerd.io
+      - kubelet=1.26.*
+      - kubeadm=1.26.*
+
+        #- name: uninstall packages of docker and kubernetes
+        #apt_key:
+      #url: "{{ item }}"
+        #state: absent
+        #with_items:
+      #- https://download.docker.com/linux/ubuntu/gpg
+        # - https://packages.cloud.google.com/apt/doc/apt-key.gpg
+      
+
+
+
+
+    
+

@@ -1,0 +1,14 @@
+
+---
+- hosts: master
+  become_user: ubuntu
+  tasks:
+    - name: Delete NGINX service
+      shell: kubectl delete service nginx
+    - name: Delete deployment
+      shell: kubectl delete deployment nginx
+    - name: Confirming the deletion
+      shell: kubectl get deployments
+      register: command_output
+    - debug:
+        var: command_output.stdout_lines
