@@ -1,5 +1,5 @@
 ---
-# tasks file for kubectl_install
+# tasks for kubectl_install
 - name: install Kubectl
   apt:
     name: kubectl=1.26.*
