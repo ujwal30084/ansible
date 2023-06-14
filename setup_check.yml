@@ -1,0 +1,8 @@
+- hosts: master
+  become: yes
+  tasks:
+    - debug: var=ansible_memory_mb
+    - debug: msg="total RAM is {{ ansible_memory_mb.real.total }}"
+    - fail: 
+       msg="not enough RAM in master node"
+      when: ansible_memory_mb.real.total < 4096

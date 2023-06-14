@@ -1,9 +1,11 @@
 ---
-- hosts: master
+- hosts: Deploy
   become_user: ubuntu
   tasks:
     - name: Deployed NGINX
       shell: kubectl create deployment nginx --image=nginx
+      ignore_errors: True  
+        
     - name: Exposed port
       shell: kubectl expose deploy nginx --port 80 --target-port 80 --type NodePort
     - name: List files and folder in home directory

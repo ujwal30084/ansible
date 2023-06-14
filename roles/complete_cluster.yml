@@ -1,0 +1,15 @@
+---
+- hosts: all
+  become_user: root
+  roles:
+    - user_create
+    - common_requirement
+- hosts: master
+  become_user: root
+  roles:
+    - master_setup
+    - getting_join_command
+- hosts: worker
+  become_user: root
+  roles:
+    - joining_worker

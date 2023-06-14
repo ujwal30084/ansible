@@ -6,6 +6,9 @@ control1 ansible_host=172.105.55.144
 [remove]
 172.104.206.60
 
+[Deploy]
+deploy1 ansible_host=172.105.55.144 ansible_user=ubuntu
+
 # This is the default ansible 'hosts' file.
 #
 # It should live in /etc/ansible/hosts
