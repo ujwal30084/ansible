@@ -5,4 +5,9 @@
     - debug: msg="total RAM is {{ ansible_memory_mb.real.total }}"
     - fail: 
        msg="not enough RAM in master node"
-      when: ansible_memory_mb.real.total < 4096
+      when: ansible_memory_mb.real.total < 1096
+
+    - name:
+      command: df -h
+      register: storage
+    - debug: var=storage.stdout_lines
